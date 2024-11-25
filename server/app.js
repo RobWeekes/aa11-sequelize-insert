@@ -24,7 +24,25 @@ app.get('/puppies', async (req, res, next) => {
 // Use these values to BUILD a new Puppy in the database.
 // Respond to the request by sending a success message
 app.post('/puppies/build', async (req, res, next) => {
-    // Your code here 
+    const { name, ageYrs, breed, weightLbs, microchipped } = req.body;
+    const newPuppy = Puppy.build({
+        name: name,
+        ageYrs: ageYrs,
+        weightLbs: weightLbs,
+        breed: breed,
+        microchipped: microchipped
+    });
+    await newPuppy.save(); // only need if using Puppy.build({})
+
+    await Puppy.findOne({
+        where: { name: name }
+    });
+
+    res.json({
+        message: 'Record successfully saved',
+        data: newPuppy
+    });
+    // Your code here
 })
 
 // STEP 2
@@ -33,7 +51,30 @@ app.post('/puppies/build', async (req, res, next) => {
 // Use these values to CREATE a new Puppy in the database.
 // Respond to the request by sending a success message
 app.post('/puppies/create', async (req, res, next) => {
-    // Your code here 
+    const { name, ageYrs, breed, weightLbs, microchipped } = req.body;
+    const newPuppy = await Puppy.create({
+        name: name,
+        ageYrs: ageYrs,
+        weightLbs: weightLbs,
+        breed: breed,
+        microchipped: microchipped
+    });
+
+    // await Puppy.findOne({
+    //     where: { name: name }
+    // });  // not needed since create() already returns the created instance
+
+    res.json({
+        message: 'Record successfully created',
+        data: newPuppy
+        // data: newPuppy was not showing up in response json, like w build -
+        // Looking at the code, I can identify the issue in the /puppies/create route. The problem is that
+        // Puppy.create() returns a Promise, but we're not awaiting it. Here's how to fix the route in app.js:
+        // 1. Added await before Puppy.create()
+        // 2. Removed the unnecessary findOne query since create() already returns the created instance
+        // 3. The response now correctly includes the newly created puppy data
+    });
+    // Your code here
 })
 
 
